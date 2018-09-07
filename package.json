@@ -1,13 +1,16 @@
 {
   "name": "scrapper",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "worker.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "description": "",
+  "optionalDependencies": {
+    "fsevents": "*"
+  },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "jsonframe-cheerio": "^3.0.1",

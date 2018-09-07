@@ -39,7 +39,6 @@ function parse(url) {
             .then(function (body) {
                 const $ = cheerio.load(body);
                 jsonframe($);
-                //retrier
                 let frame = {
                     flats: {
                         _s: ".b-catalog-table__item",
@@ -70,11 +69,11 @@ function Compare() {
 
     clearArray();
 
-    let store = {}; // объект для коллекции
+    let store = {};
 
     for (let i = 0; i < oldFlatList.length; i++) {
-        let key = oldFlatList[i].Address; // для каждого элемента создаём свойство
-        store[key] = oldFlatList[i].Price; // значение здесь не важно
+        let key = oldFlatList[i].Address;
+        store[key] = oldFlatList[i].Price;
     }
 
     mongoClient.connect(uri, {useNewUrlParser: true})
