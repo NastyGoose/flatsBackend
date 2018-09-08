@@ -13,7 +13,9 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
+    "date-and-time": "^0.6.2",
     "jsonframe-cheerio": "^3.0.1",
+    "log4js": "^3.0.5",
     "mongodb": "^3.1.4",
     "mongoose": "^5.2.13",
     "request": "^2.88.0",
