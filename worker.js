@@ -13,7 +13,7 @@ let newFlatsList = [];
 let oldFlatList = [];
 const uri = "mongodb+srv://Staaalker:Chernobyl1986@clusterino-beiho.mongodb.net/test?retryWrites=true";
 
-function getData() {
+export function getData() {
 
     mongoClient.connect(uri, {useNewUrlParser: true})
         .then((db) => {
