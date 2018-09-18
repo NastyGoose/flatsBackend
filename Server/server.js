@@ -1,11 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-import { getData } from './utilFunctions';
+import mongoose from 'mongoose';
 
- let data = getData((res) => {
-    data = res;
-});
+// Set up Mongoose
+mongoose.connect("mongodb+srv://Staaalker:Chernobyl1986@clusterino-beiho.mongodb.net/test?retryWrites=true",
+    { useNewUrlParser: true });
+mongoose.Promise = global.Promise;
 
 // Initialization of express application
 const app = express();
@@ -16,11 +17,10 @@ app.use( bodyParser.json() );
 // Allow requests from any origin
 app.use(cors({ origin: '*' }));
 
-// RESTful api handlers
-app.get('/', async function(req, res){
-    await res.send(data);
-});
+// API routes
+require('./routes')(app);
 
 app.listen(8080, function() {
     console.log(`Server is up and running on port 8080`);
 });
+
