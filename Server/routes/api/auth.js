@@ -1,4 +1,4 @@
-const User = require('../../models/User');
+const User = require('../../models/user');
 const UserSession = require('../../models/userSession');
 const jwt = require('jsonwebtoken');
 
@@ -62,7 +62,6 @@ router.post('/signup', (req, res, next) => {
         newUser.token = jwt.sign({
             email,
             login,
-            password: newUser.password
         }, 'keyword');
         newUser.save((err, user) => {
             if (err) {
@@ -87,7 +86,7 @@ router.post('/signin', (req, res, next) => {
     let {
         email
     } = body;
-
+    console.log(req.body);
     if (!email) {
         return res.send({
             success: false,
@@ -103,9 +102,9 @@ router.post('/signin', (req, res, next) => {
 
     email = email.toLowerCase();
 
-    User.find({
+    User.findOne({
         email: email
-    }, (err, users) => {
+    }, (err, user) => {
         if (err) {
             console.log("error: ",err);
             return res.send({
@@ -113,46 +112,78 @@ router.post('/signin', (req, res, next) => {
                 message: 'Error: server error'
             });
         }
-        if (users.length != 1) {
-            return res.send({
-                success: false,
-                message: 'Error: Invalid'
-            });
-        }
 
-        const user = users[0];
-        if (!user.validPassword(password)) {
-            return res.send({
-                success: false,
-                message: 'Error: Invalid'
-            });
-        }
-
-        // Otherwise
-        const userSession = new UserSession();
-        userSession.userId = user.token;
-        userSession.save((err, doc) => {
-            if (err) {
-                console.log("error2: ",err);
+        if (user) {
+            if (!user.validPassword(password)) {
                 return res.send({
                     success: false,
-                    message: 'Error: server error'
+                    message: 'Error: Invalid password'
                 });
             }
-            console.log(doc);
-            return res.send({
-                success: true,
-                message: 'Valid sign in',
-                token: doc.userId
+
+            // Otherwise
+            const userSession = new UserSession();
+            userSession.userId = user.token;
+            userSession.save((err, doc) => {
+                if (err) {
+                    console.log("error2: ", err);
+                    return res.send({
+                        success: false,
+                        message: 'Error: server error'
+                    });
+                }
+                console.log('flats: ', user.favoriteFlats);
+                return res.send({
+                    success: true,
+                    message: 'Valid sign in',
+                    token: doc.userId,
+                    favoriteFlats: user.favoriteFlats
+                });
             });
-        });
+        } else {
+            console.log('User not found');
+        }
+    });
+});
+
+router.post('/changeData', (req, res, next) => {
+   const { payload }= req.body.payload;
+   console.log(payload);
+   const email = payload.email;
+   const login = payload.login;
+   const newUser = new User();
+   const password = newUser.generateHash(payload.password);
+   User.findOneAndUpdate({ email: email }, {
+       login: login,
+       email: email,
+       password: password,
+       token: jwt.sign({
+           email,
+           login,
+       }, 'keyword')
+   }, {new: true}, (err, user) => {
+        if (err) {
+            console.log("error: ",err);
+            return res.send({
+                success: false,
+                message: 'Error: server error'
+            });
+        }
+        if (user.token) {
+            console.log(user);
+            return res.send(user.token);
+        }
+        return res.send('user not found!');
     });
 });
 
 router.get('/verify', (req, res, next) => {
     // Get the token
+    console.log('request: ', req);
     const { query } = req;
+    console.log('query: ', query);
     const { token } = query;
+    console.log('token: ', token);
     // ?token=test
 
     // Verify the token is one of the kind and its not deleted

@@ -20,6 +20,10 @@ const UserSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    favoriteFlats: {
+        type: Array,
+        default: []
+    },
 });
 
 UserSchema.methods.generateHash = function(password) {

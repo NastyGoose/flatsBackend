@@ -3,10 +3,12 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 
+const usersURI = process.env.MONGO_USERS;
+const flatsURI = process.env.MONGO_FLATS;
+
 // Set up Mongoose
-mongoose.connect("mongodb+srv://Staaalker:Chernobyl1986@clusterino-beiho.mongodb.net/test?retryWrites=true",
+mongoose.connect(flatsURI,
     { useNewUrlParser: true });
-mongoose.Promise = global.Promise;
 
 // Initialization of express application
 const app = express();

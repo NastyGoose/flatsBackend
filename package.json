@@ -1,10 +1,10 @@
 {
-  "name": "scrapper",
+  "name": "backend",
   "version": "1.0.0",
-  "main": "worker.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --exec babel-node server/server.js --presets es2015,stage-2"
+    "start": "nodemon --exec babel-node Server/server.js --presets es2015,stage-2"
   },
   "author": "",
   "license": "ISC",
@@ -20,7 +20,8 @@
     "jsonwebtoken": "^8.3.0",
     "log4js": "^3.0.5",
     "mongodb": "^3.1.4",
-    "mongoose": "^5.2.14"
+    "mongoose": "^5.2.14",
+    "lodash": "latest"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",
