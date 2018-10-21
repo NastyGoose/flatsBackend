@@ -1,116 +1,70 @@
 const mongoClient = require("mongodb").MongoClient;
 const lodash = require("lodash");
 const ObjectID = require('mongodb').ObjectID;
+const User = require('../models/user');
+const Flat = require('../models/flat');
 
 const uri = process.env.MONGO_FLATS;
 
 function addFavorite(email, id) {
-    return mongoClient.connect(uri,
-        { useNewUrlParser: true })
-        .then((db) => {
-            const dbase = db.db("flats");
-            return dbase.collection('users')
-                .findOneAndUpdate({ email: email }, { $push: { "favoriteFlats": id } })
-                .finally(() => db.close());
-        })
+    return User
+        .findOneAndUpdate({ email: email }, { $push: { "favoriteFlats": id } })
         .catch((err) => console.log('caught err: ', err));
 }
 
 function removeFavorite(email, id) {
-    return mongoClient.connect(uri,
-        { useNewUrlParser: true })
-        .then((db) => {
-            const dbase = db.db("flats");
-            return dbase.collection('users')
-                .findOneAndUpdate({ email: email }, { $pull: { "favoriteFlats": id } })
-                .finally(() => db.close());
-        })
+    return User
+        .findOneAndUpdate({ email: email }, { $pull: { "favoriteFlats": id } })
         .catch((err) => console.log('caught err: ', err));
 }
 
 function getById(arr) {
     const idArr = arr.map(curr => ObjectID(curr));
-    return mongoClient.connect(uri,
-        { useNewUrlParser: true })
-        .then((db) => {
-            const dbase = db.db("flats");
-            return dbase.collection('flats')
-                .find({ _id: { $in: idArr } })
-                .toArray()
-                .then((res) => {
-                    console.log(res);
-                    return(res);
-                });
-
+    return Flat
+        .find({ _id: { $in: idArr } })
+        .then((res) => {
+            return(res);
         })
         .catch((err) => console.log('caught err: ', err));
 }
 
 function getFavorite(email) {
-    return mongoClient.connect(uri,
-        { useNewUrlParser: true })
-        .then((db) => {
-            const dbase = db.db("flats");
-            return dbase.collection('users')
-                .findOne({ email: email })
-                .then((res) => {
-                    const idArr = res.favoriteFlats.map(curr =>ObjectID(curr));
-                    return dbase.collection('flats')
-                        .find({ _id: { $in: idArr } })
-                        .toArray()
-                        .then(res => res)
-                        .finally(() => db.close());
-                });
-
-        })
-        .catch((err) => console.log('caught err: ', err));
+    return User
+        .findOne({ email: email })
+        .then((res) => {
+            const idArr = res.favoriteFlats.map(curr =>ObjectID(curr));
+            return Flat
+                .find({ _id: { $in: idArr } })
+                .then(res => res);
+                })
+        .catch((err) => console.log('caught err in getFavorite: ', err));
 }
 
 function getFlats(filter, chunkSize) {
+    console.log('filter: ', filter);
+    console.log('chunksSize: ', chunkSize);
     switch (filter.sort) {
         case 'Date':
-            return mongoClient.connect(uri,
-                { useNewUrlParser: true })
-                .then((db) => {
-                    const dbase = db.db("flats");
-                    return dbase.collection('flats')
-                        .find()
-                        .sort({ UpdateDate: parseInt(filter.order, 10) })
-                        .toArray()
-                        .then((res) => {
-                            return lodash.chunk(res, chunkSize);
-                        })
-                        .finally(() => db.close());
+            return Flat
+                .find()
+                .sort({ UpdateDate: parseInt(filter.order, 10) })
+                .then((res) => {
+                    return lodash.chunk(res, chunkSize);
                 })
                 .catch((err) => console.log(err));
         case 'Price':
-            return mongoClient.connect(uri,
-                { useNewUrlParser: true })
-                .then((db) => {
-                    const dbase = db.db("flats");
-                    return dbase.collection('flats')
-                        .find()
-                        .sort({ Price: parseInt(filter.order, 10) })
-                        .toArray()
-                        .then((res) => {
-                            return lodash.chunk(res, chunkSize);
-                        })
-                        .finally(() => db.close());
+            return Flat
+                .find()
+                .sort({ Price: parseInt(filter.order, 10) })
+                .then((res) => {
+                    return lodash.chunk(res, chunkSize);
                 })
                 .catch((err) => console.log(err));
         default:
-            return mongoClient.connect(uri,
-                { useNewUrlParser: true })
-                .then((db) => {
-                    const dbase = db.db("flats");
-                    return dbase.collection('flats')
-                        .find()
-                        .toArray()
-                        .then((res) => {
-                        return lodash.chunk(res, chunkSize);
-                        })
-                        .finally(() => db.close());
-                    // this.flats = lodash.chunk(flats, chunkSize);
+            return Flat
+                .find()
+                .then((res) => {
+                    return lodash.chunk(res, chunkSize);
                 })
                 .catch((err) => console.log(err));
     }
@@ -147,6 +101,18 @@ function getLimits(page, length) {
     }
 }
 
+function findFlat(address) {
+    return Flat
+        .findOne({ Address: address })
+        .then((res) => {
+            console.log(res);
+            return(res);
+        })
+        .catch((err) => console.log('caught err: ', err));
+}
+
+// exports
+module.exports.findFlat = findFlat;
 module.exports.getById = getById;
 module.exports.getFavorite = getFavorite;
 module.exports.addFavorite = addFavorite;

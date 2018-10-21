@@ -13,15 +13,16 @@ module.exports = (app) => {
           console.log('sort: ', filter.sort);
           console.log('order: ', filter.order);
           console.log('chunkSize: ', params.chunkSize);
-          console.log('page: ', params.page);
+          console.log('index: ', params.page);
 
           getter.getFlats(filter, params.chunkSize)
               .then(data => {
                   console.log('number of chunks: ', data.length);
-                  const limits = getter.getLimits(params.page, data.length);
+                  const limits = getter.getLimits(params.page, data.length - 1);
                   console.log('start: ', limits.startIndex);
                   console.log('end: ', limits.endIndex);
                   const response = {
+                    lastIndex: data.length - 1,
                     pagesIndexes: {
                         startIndex: limits.startIndex,
                         endIndex: limits.endIndex,

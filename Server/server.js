@@ -3,7 +3,6 @@ import cors from 'cors';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
 
-const usersURI = process.env.MONGO_USERS;
 const flatsURI = process.env.MONGO_FLATS;
 
 // Set up Mongoose

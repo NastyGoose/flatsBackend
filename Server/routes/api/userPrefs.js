@@ -1,4 +1,5 @@
 const flats = require('../../flatsLogic/flatsMethods.js');
+const lodash = require('lodash');
 
 module.exports = (app) => {
     app.post('/newFavorite', function(req, res) {
@@ -28,8 +29,9 @@ module.exports = (app) => {
 
         flats.getFavorite(req.params.email)
             .then(data => {
-               console.log('data: ', data);
-               res.send(data);
+                console.log('responsing');
+                console.log(lodash.compact(data));
+               res.send(lodash.compact(data));
             });
     });
 
@@ -40,6 +42,15 @@ module.exports = (app) => {
             .then(data => {
                 console.log('data: ', data);
                 res.send(data);
+            });
+    });
+
+    app.get('/findFlat/:address', function(req, res) {
+        console.log(req.params);
+        const { address } = req.params;
+        flats.findFlat(address)
+            .then(data => {
+                console.log('data: ', data);
             });
     });
 };

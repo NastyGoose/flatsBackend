@@ -137,7 +137,6 @@ router.post('/signin', (req, res, next) => {
                     success: true,
                     message: 'Valid sign in',
                     token: doc.userId,
-                    favoriteFlats: user.favoriteFlats
                 });
             });
         } else {
@@ -147,34 +146,33 @@ router.post('/signin', (req, res, next) => {
 });
 
 router.post('/changeData', (req, res, next) => {
-   const { payload }= req.body.payload;
-   console.log(payload);
-   const email = payload.email;
-   const login = payload.login;
-   const newUser = new User();
-   const password = newUser.generateHash(payload.password);
-   User.findOneAndUpdate({ email: email }, {
-       login: login,
-       email: email,
-       password: password,
-       token: jwt.sign({
-           email,
-           login,
-       }, 'keyword')
-   }, {new: true}, (err, user) => {
-        if (err) {
-            console.log("error: ",err);
-            return res.send({
-                success: false,
-                message: 'Error: server error'
-            });
-        }
-        if (user.token) {
-            console.log(user);
-            return res.send(user.token);
-        }
-        return res.send('user not found!');
-    });
+   console.log(req.body);
+   const { payload } = req.body.newData;
+   const { oldEmail } = req.body.newData;
+
+   User.findOne({ email: oldEmail }, (err, user) => {
+       Object.keys(payload).forEach(curr => {
+           user[curr] = payload[curr];
+       });
+       user.token = jwt.sign({
+                    email: user.email,
+                    login: user.login,
+                }, 'keyword');
+
+       user.update({
+           $set: {
+                 email: user.email,
+                 login: user.login,
+                 password: user.generateHash(user.password),
+                 token: user.token,
+           }}).exec();
+
+       return res.send({
+                  success: true,
+                  message: 'Successfully changed data',
+                  payload: user.token,
+                  });
+   });
 });
 
 router.get('/verify', (req, res, next) => {
@@ -214,6 +212,40 @@ router.get('/verify', (req, res, next) => {
             }
         }
     );
+});
+
+router.get('/checkPassword/:email/:password', (req, res, next) => {
+    console.log(req.params);
+    const {
+        password,
+        email
+    } = req.params;
+
+    User.findOne({
+            email,
+            isDeleted: false
+        }, (err, user) => {
+        if (err) {
+            console.log(err);
+            return res.send({
+                success: false,
+                message: 'Error: Server error'
+            });
+        }
+
+        if (user) {
+            if (!user.validPassword(password)) {
+                return res.send({
+                    success: false,
+                    message: 'Error: Invalid password'
+                });
+            }
+            return res.send({
+                success: true,
+                message: 'Success'
+            });
+        }
+    });
 });
 
 router.get('/logout', (req, res, next) => {
