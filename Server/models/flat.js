@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
+const mongoosastic = require('mongoosastic');
 
 const FlatSchema = new mongoose.Schema({
     Address: {
         type: String,
         default: '',
-        unique: true
+        unique: true,
+        es_indexed: true
     },
     Price: {
         type: Number,
@@ -33,5 +35,6 @@ const FlatSchema = new mongoose.Schema({
     }
 });
 
+FlatSchema.plugin(mongoosastic);
 module.exports = mongoose.model('Flat', FlatSchema);
 

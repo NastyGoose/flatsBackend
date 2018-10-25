@@ -123,7 +123,7 @@ router.post('/signin', (req, res, next) => {
 
             // Otherwise
             const userSession = new UserSession();
-            userSession.userId = user.token;
+            userSession.userToken = user.token;
             userSession.save((err, doc) => {
                 if (err) {
                     console.log("error2: ", err);
@@ -136,7 +136,7 @@ router.post('/signin', (req, res, next) => {
                 return res.send({
                     success: true,
                     message: 'Valid sign in',
-                    token: doc.userId,
+                    token: doc.userToken,
                 });
             });
         } else {
@@ -149,6 +149,8 @@ router.post('/changeData', (req, res, next) => {
    console.log(req.body);
    const { payload } = req.body.newData;
    const { oldEmail } = req.body.newData;
+
+   if (payload.password) payload.password = generateHash(payload.password);
 
    User.findOne({ email: oldEmail }, (err, user) => {
        Object.keys(payload).forEach(curr => {
@@ -163,7 +165,7 @@ router.post('/changeData', (req, res, next) => {
            $set: {
                  email: user.email,
                  login: user.login,
-                 password: user.generateHash(user.password),
+                 password: user.password,
                  token: user.token,
            }}).exec();
 

@@ -1,5 +1,6 @@
 const flats = require('../../flatsLogic/flatsMethods.js');
 const lodash = require('lodash');
+const getter = require('../../flatsLogic/flatsMethods');
 
 module.exports = (app) => {
     app.post('/newFavorite', function(req, res) {
@@ -29,9 +30,17 @@ module.exports = (app) => {
 
         flats.getFavorite(req.params.email)
             .then(data => {
-                console.log('responsing');
-                console.log(lodash.compact(data));
-               res.send(lodash.compact(data));
+               if (data.length > 0) {
+                   res.send({
+                       success: true,
+                       payload: lodash.compact(data)
+               });
+               } else {
+                   res.send({
+                       success: false,
+                       payload: []
+                   });
+               }
             });
     });
 
@@ -45,12 +54,30 @@ module.exports = (app) => {
             });
     });
 
-    app.get('/findFlat/:address', function(req, res) {
+    app.get('/findFlat/:address/:chunksSize/:page', function(req, res) {
         console.log(req.params);
-        const { address } = req.params;
-        flats.findFlat(address)
+        const { address, chunksSize, page } = req.params;
+        flats.findFlat(address, chunksSize)
             .then(data => {
-                console.log('data: ', data);
+                if (data.length > 0) {
+                    const limits = getter.getLimits(page, data.length - 1);
+                    res.send({
+                        success: true,
+                        payload: {
+                            flats: data[page],
+                            lastIndex: data.length - 1,
+                            pagesIndexes: {
+                                startIndex: limits.startIndex,
+                                endIndex: limits.endIndex,
+                            },
+                        },
+                    });
+                } else {
+                    res.send({
+                        success: false,
+                        message: 'Квартир подходящих под запрос не найдено!',
+                    });
+                }
             });
     });
 };

@@ -1,10 +1,8 @@
-const mongoClient = require("mongodb").MongoClient;
+// imports
 const lodash = require("lodash");
 const ObjectID = require('mongodb').ObjectID;
 const User = require('../models/user');
 const Flat = require('../models/flat');
-
-const uri = process.env.MONGO_FLATS;
 
 function addFavorite(email, id) {
     return User
@@ -46,7 +44,7 @@ function getFlats(filter, chunkSize) {
     switch (filter.sort) {
         case 'Date':
             return Flat
-                .find()
+                .find({ Price: { $gte: filter.minPrice, $lte: filter.maxPrice }})
                 .sort({ UpdateDate: parseInt(filter.order, 10) })
                 .then((res) => {
                     return lodash.chunk(res, chunkSize);
@@ -54,7 +52,7 @@ function getFlats(filter, chunkSize) {
                 .catch((err) => console.log(err));
         case 'Price':
             return Flat
-                .find()
+                .find({ Price: { $gte: filter.minPrice, $lte: filter.maxPrice }})
                 .sort({ Price: parseInt(filter.order, 10) })
                 .then((res) => {
                     return lodash.chunk(res, chunkSize);
@@ -62,7 +60,7 @@ function getFlats(filter, chunkSize) {
                 .catch((err) => console.log(err));
         default:
             return Flat
-                .find()
+                .find({ Price: { $gte: filter.minPrice, $lte: filter.maxPrice }})
                 .then((res) => {
                     return lodash.chunk(res, chunkSize);
                 })
@@ -101,14 +99,31 @@ function getLimits(page, length) {
     }
 }
 
-function findFlat(address) {
-    return Flat
-        .findOne({ Address: address })
-        .then((res) => {
-            console.log(res);
-            return(res);
-        })
-        .catch((err) => console.log('caught err: ', err));
+async function findFlat(address, chunksSize) {
+    console.log(address);
+    return new Promise(resolve => Flat.search(
+        {query_string: {query: address}},
+        {hydrate: true},
+    (err, res) => {
+            if (err) console.log('error: ', err);
+            console.log('result: ', res.hits.hits.length);
+            resolve(lodash.chunk(res.hits.hits, chunksSize));
+    }));
+}
+
+function sync() {
+    const stream = Flat.synchronize();
+    let count = 0;
+
+    stream.on('data', (err, doc) => {
+        count++;
+    });
+    stream.on('close', () => {
+        console.log('indexed ' + count + ' document!');
+    });
+    stream.on('error', (err) => {
+        console.log(err);
+    });
 }
 
 // exports

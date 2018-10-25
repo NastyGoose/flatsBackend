@@ -21,7 +21,10 @@ app.use(cors({ origin: '*' }));
 // API routes
 require('./routes')(app);
 
+// app.listen(process.env.PORT || 8080, function() {
+//     console.log(`Server is up and running on port ${process.env.PORT || 8080}`);
+// });
+
 app.listen(8080, function() {
     console.log(`Server is up and running on port 8080`);
 });
-
