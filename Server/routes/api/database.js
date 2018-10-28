@@ -1,4 +1,5 @@
 const getter = require('../../flatsLogic/flatsMethods');
+const lodash = require('lodash');
 
 module.exports = (app) => {
       app.get('/flats', function(req, res) {
@@ -9,7 +10,7 @@ module.exports = (app) => {
               order: query.order,
               minPrice: query.minPrice,
               maxPrice: query.maxPrice,
-              find: query.find
+              address: query.address
           };
 
           // logs
@@ -19,24 +20,35 @@ module.exports = (app) => {
           console.log('minPrice: ', filter.minPrice);
           console.log('maxPrice: ', filter.maxPrice);
           console.log('index: ', query.page);
-          console.log('find: ', filter.find);
+          console.log('address: ', filter.address);
 
-          getter.getFlats(filter, query.chunkSize)
+          getter.getFlats(filter)
               .then(data => {
-                  console.log('number of chunks: ', data.length);
-                  const limits = getter.getLimits(query.page, data.length - 1);
-                  console.log('start: ', limits.startIndex);
-                  console.log('end: ', limits.endIndex);
+                  if (data.length && data.length > 0) {
+                      const flatsList = lodash.chunk(data, query.chunkSize);
 
-                  const response = {
-                    lastIndex: data.length - 1,
-                    pagesIndexes: {
-                        startIndex: limits.startIndex,
-                        endIndex: limits.endIndex,
-                    },
-                    flats: data[query.page],
-                  };
-                  res.send(response);
+                      console.log('number of chunks: ', flatsList.length);
+                      const limits = getter.getLimits(query.page, flatsList.length - 1);
+                      console.log('start: ', limits.startIndex);
+                      console.log('end: ', limits.endIndex);
+
+                      const response = {
+                          success: true,
+                          lastIndex: flatsList.length - 1,
+                          pagesIndexes: {
+                              startIndex: limits.startIndex,
+                              endIndex: limits.endIndex,
+                          },
+                          flats: flatsList[query.page],
+                      };
+                      res.send(response);
+                  } else {
+                      const response = {
+                          success: false,
+                          flats: "Ничего не найдено",
+                      };
+                      res.send(response);
+                  }
       });
     });
   };

@@ -6,11 +6,16 @@ const FlatSchema = new mongoose.Schema({
         type: String,
         default: '',
         unique: true,
-        es_indexed: true
+        es_indexed: true,
+        es_type: 'string',
+        es_analyzer: 'russian',
+        index: 'analyzed',
     },
     Price: {
         type: Number,
-        default: ''
+        default: '',
+        es_indexed: true,
+        es_type: 'integer',
     },
     Description: {
         type: String,
@@ -26,7 +31,9 @@ const FlatSchema = new mongoose.Schema({
     },
     UpdateDate: {
         type: Date,
-        default: new Date()
+        default: new Date(),
+        es_indexed: true,
+        es_type: 'date',
     },
     URL: {
         type: String,

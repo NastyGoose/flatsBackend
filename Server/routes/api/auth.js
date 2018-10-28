@@ -150,11 +150,10 @@ router.post('/changeData', (req, res, next) => {
    const { payload } = req.body.newData;
    const { oldEmail } = req.body.newData;
 
-   if (payload.password) payload.password = generateHash(payload.password);
-
    User.findOne({ email: oldEmail }, (err, user) => {
        Object.keys(payload).forEach(curr => {
-           user[curr] = payload[curr];
+           if (curr === 'password') user[curr] = user.generateHash(payload.password);
+           else user[curr] = payload[curr];
        });
        user.token = jwt.sign({
                     email: user.email,

@@ -38,33 +38,111 @@ function getFavorite(email) {
         .catch((err) => console.log('caught err in getFavorite: ', err));
 }
 
-function getFlats(filter, chunkSize) {
-    console.log('filter: ', filter);
-    console.log('chunksSize: ', chunkSize);
+function getFlats(filter) {
+    const order = filter.order > 0 ? 'asc' : 'desc';
     switch (filter.sort) {
         case 'Date':
-            return Flat
-                .find({ Price: { $gte: filter.minPrice, $lte: filter.maxPrice }})
-                .sort({ UpdateDate: parseInt(filter.order, 10) })
-                .then((res) => {
-                    return lodash.chunk(res, chunkSize);
-                })
-                .catch((err) => console.log(err));
+            return new Promise(resolve => Flat.
+                esSearch({
+                    "size": 1000,
+                    "query": {
+                        "match_all": {},
+                        "bool": {
+                            "filter": {
+                                "range": {
+                                    "Price": {
+                                        "gte": filter.minPrice || 0,
+                                        "lte": filter.maxPrice || 3000
+                                    }
+                                }
+                            },
+                            "must": {
+                                "fuzzy": {
+                                    "Address": {
+                                        "value": filter.address === '' ? '*' : filter.address,
+                                        "fuzziness": 2,
+                                        "transpositions": true
+                                    }
+                                }
+                            }
+                        }
+                    }
+            }, {  "sort" :
+                    { "UpdateDate" : {"order" : order}},
+                    hydrate: true
+                }
+            ,
+            (err, res) => {
+                if (err) console.log('error: ', err);
+                console.log('result: ', res);
+                resolve(res.hits.hits);
+            }));
         case 'Price':
-            return Flat
-                .find({ Price: { $gte: filter.minPrice, $lte: filter.maxPrice }})
-                .sort({ Price: parseInt(filter.order, 10) })
-                .then((res) => {
-                    return lodash.chunk(res, chunkSize);
-                })
-                .catch((err) => console.log(err));
+            return new Promise(resolve => Flat.
+            esSearch({
+                "size": 1000,
+                "query": {
+                    "bool": {
+                        "filter": {
+                            "range": {
+                                "Price": {
+                                    "gte": filter.minPrice || 0,
+                                    "lte": filter.maxPrice || 3000
+                                }
+                            }
+                        },
+                        "must": {
+                            "fuzzy": {
+                                "Address": {
+                                    "value": filter.address === '' ? '*' : filter.address,
+                                    "fuzziness": 2,
+                                    "transpositions": true
+                                }
+                            }
+                        }
+                    }
+                }
+                }, {  "sort" :
+                        { "Price" : {"order" : order}},
+                    hydrate: true,
+                }
+                ,
+                (err, res) => {
+                    if (err) console.log('error: ', err);
+                    console.log('result: ', res);
+                    resolve(res.hits.hits);
+                }));
         default:
-            return Flat
-                .find({ Price: { $gte: filter.minPrice, $lte: filter.maxPrice }})
-                .then((res) => {
-                    return lodash.chunk(res, chunkSize);
-                })
-                .catch((err) => console.log(err));
+            return new Promise(resolve => Flat.
+            esSearch({
+                    "size": 1000,
+                    "query": {
+                        "bool": {
+                            "filter": {
+                                "range": {
+                                    "Price": {
+                                        "gte": filter.minPrice || 0,
+                                        "lte": filter.maxPrice || 3000
+                                    }
+                                }
+                            },
+                            "must": {
+                                "fuzzy": {
+                                    "Address": {
+                                        "value": filter.address === '' ? '*' : filter.address,
+                                        "fuzziness": 2,
+                                        "transpositions": true
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }, { hydrate: true },
+                (err, res) => {
+                    if (err) console.log('error: ', err);
+                    console.log('result: ', res);
+                    resolve(res.hits.hits);
+                }));
     }
 }
 
@@ -99,19 +177,7 @@ function getLimits(page, length) {
     }
 }
 
-async function findFlat(address, chunksSize) {
-    console.log(address);
-    return new Promise(resolve => Flat.search(
-        {query_string: {query: address}},
-        {hydrate: true},
-    (err, res) => {
-            if (err) console.log('error: ', err);
-            console.log('result: ', res.hits.hits.length);
-            resolve(lodash.chunk(res.hits.hits, chunksSize));
-    }));
-}
-
-function sync() {
+async function sync() {
     const stream = Flat.synchronize();
     let count = 0;
 
@@ -124,10 +190,22 @@ function sync() {
     stream.on('error', (err) => {
         console.log(err);
     });
+    // Book.createMapping({
+    //     "analysis" : {
+    //         "analyzer":{
+    //             "content":{
+    //                 "type":"custom",
+    //                 "tokenizer":"whitespace"
+    //             }
+    //         }
+    //     }
+    // },function(err, mapping){
+    //     console.log(mapping);
+    // });
 }
 
 // exports
-module.exports.findFlat = findFlat;
+module.exports.sync = sync;
 module.exports.getById = getById;
 module.exports.getFavorite = getFavorite;
 module.exports.addFavorite = addFavorite;

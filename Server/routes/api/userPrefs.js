@@ -54,30 +54,7 @@ module.exports = (app) => {
             });
     });
 
-    app.get('/findFlat/:address/:chunksSize/:page', function(req, res) {
-        console.log(req.params);
-        const { address, chunksSize, page } = req.params;
-        flats.findFlat(address, chunksSize)
-            .then(data => {
-                if (data.length > 0) {
-                    const limits = getter.getLimits(page, data.length - 1);
-                    res.send({
-                        success: true,
-                        payload: {
-                            flats: data[page],
-                            lastIndex: data.length - 1,
-                            pagesIndexes: {
-                                startIndex: limits.startIndex,
-                                endIndex: limits.endIndex,
-                            },
-                        },
-                    });
-                } else {
-                    res.send({
-                        success: false,
-                        message: 'Квартир подходящих под запрос не найдено!',
-                    });
-                }
-            });
+    app.get('/sync', function() {
+        flats.sync();
     });
 };
