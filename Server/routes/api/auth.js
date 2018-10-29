@@ -6,7 +6,7 @@ const { Router } = require('express');
 
 const router = new Router();
 
-router.post('/signup', (req, res, next) => {
+router.post('/signup', (req, res) => {
     const { body } = req;
     const {
         login,
@@ -63,7 +63,7 @@ router.post('/signup', (req, res, next) => {
             email,
             login,
         }, 'keyword');
-        newUser.save((err, user) => {
+        newUser.save((err) => {
             if (err) {
                 return res.send({
                     success: false,
@@ -78,7 +78,7 @@ router.post('/signup', (req, res, next) => {
     });
 });
 
-router.post('/signin', (req, res, next) => {
+router.post('/signin', (req, res) => {
     const { body } = req;
     const {
         password
@@ -117,7 +117,7 @@ router.post('/signin', (req, res, next) => {
             if (!user.validPassword(password)) {
                 return res.send({
                     success: false,
-                    message: 'Error: Invalid password'
+                    message: 'Invalid password'
                 });
             }
 
@@ -140,12 +140,15 @@ router.post('/signin', (req, res, next) => {
                 });
             });
         } else {
-            console.log('User not found');
+            return res.send({
+                success: false,
+                message: 'User not found',
+            });
         }
     });
 });
 
-router.post('/changeData', (req, res, next) => {
+router.post('/changeData', (req, res) => {
    console.log(req.body);
    const { payload } = req.body.newData;
    const { oldEmail } = req.body.newData;
@@ -176,7 +179,7 @@ router.post('/changeData', (req, res, next) => {
    });
 });
 
-router.get('/verify', (req, res, next) => {
+router.get('/verify', (req, res) => {
     // Get the token
     console.log('request: ', req);
     const { query } = req;
@@ -215,7 +218,7 @@ router.get('/verify', (req, res, next) => {
     );
 });
 
-router.get('/checkPassword/:email/:password', (req, res, next) => {
+router.get('/checkPassword/:email/:password', (req, res) => {
     console.log(req.params);
     const {
         password,
@@ -249,7 +252,7 @@ router.get('/checkPassword/:email/:password', (req, res, next) => {
     });
 });
 
-router.get('/logout', (req, res, next) => {
+router.get('/logout', (req, res) => {
     // Get the token
     const { query } = req;
     const { token } = query;

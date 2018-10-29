@@ -1,8 +1,12 @@
 const flats = require('../../flatsLogic/flatsMethods.js');
 const lodash = require('lodash');
 
-module.exports = (app) => {
-    app.post('/newFavorite', function(req, res) {
+const { Router } = require('express');
+
+const router = new Router();
+
+
+router.post('/newFavorite', function(req, res) {
         console.log('adding: ', req.body);
 
         flats.addFavorite(req.body.email, req.body.id)
@@ -11,9 +15,9 @@ module.exports = (app) => {
                 return res.send('false');
             })
             .catch(err => res.send(err));
-    });
+});
 
-    app.post('/removeFavorite', function(req, res) {
+router.post('/removeFavorite', function(req, res) {
         console.log('removing: ', req.body);
 
         flats.removeFavorite(req.body.email, req.body.id)
@@ -22,9 +26,9 @@ module.exports = (app) => {
                 return res.send('false');
             })
             .catch(err => res.send(err));
-    });
+});
 
-    app.get('/getFavorite/:email', function(req, res) {
+router.get('/getFavorite/:email', function(req, res) {
         console.log(req.params);
 
         flats.getFavorite(req.params.email)
@@ -41,9 +45,9 @@ module.exports = (app) => {
                    });
                }
             });
-    });
+});
 
-    app.get('/getById/:idArr', function(req, res) {
+router.get('/getById/:idArr', function(req, res) {
         console.log(req.params);
         const { idArr } = JSON.parse(req.params.idArr);
         flats.getById(idArr)
@@ -51,9 +55,12 @@ module.exports = (app) => {
                 console.log('data: ', data);
                 res.send(data);
             });
-    });
+});
 
-    app.get('/sync', function() {
+router.get('/sync', function() {
         flats.sync();
-    });
+});
+
+module.exports = (app) => {
+    app.use('/api/database', router);
 };

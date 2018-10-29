@@ -2,7 +2,7 @@ const getter = require('../../flatsLogic/flatsMethods');
 const lodash = require('lodash');
 
 module.exports = (app) => {
-      app.get('/flats', function(req, res) {
+      app.get('/api/database/getFlats', function(req, res) {
           const { query } = req;
 
           const filter = {
