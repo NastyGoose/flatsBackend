@@ -1,6 +1,5 @@
 const flats = require('../../flatsLogic/flatsMethods.js');
 const lodash = require('lodash');
-const getter = require('../../flatsLogic/flatsMethods');
 
 module.exports = (app) => {
     app.post('/newFavorite', function(req, res) {

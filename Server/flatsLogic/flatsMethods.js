@@ -1,5 +1,4 @@
 // imports
-const lodash = require("lodash");
 const ObjectID = require('mongodb').ObjectID;
 const User = require('../models/user');
 const Flat = require('../models/flat');
@@ -39,14 +38,21 @@ function getFavorite(email) {
 }
 
 function getFlats(filter) {
-    const order = filter.order > 0 ? 'asc' : 'desc';
+    const matchObj = filter.address.length > 0 ? {
+        "match": {
+            "Address": {
+                "query": filter.address,
+            }
+        }
+    } : { "match_all": {} };
+    console.log(matchObj);
     switch (filter.sort) {
         case 'Date':
             return new Promise(resolve => Flat.
                 esSearch({
+                    "sort" : { "UpdateDate" : { "order" : filter.order }},
                     "size": 1000,
                     "query": {
-                        "match_all": {},
                         "bool": {
                             "filter": {
                                 "range": {
@@ -56,30 +62,19 @@ function getFlats(filter) {
                                     }
                                 }
                             },
-                            "must": {
-                                "fuzzy": {
-                                    "Address": {
-                                        "value": filter.address === '' ? '*' : filter.address,
-                                        "fuzziness": 2,
-                                        "transpositions": true
-                                    }
-                                }
-                            }
+                            "must": matchObj
                         }
                     }
-            }, {  "sort" :
-                    { "UpdateDate" : {"order" : order}},
-                    hydrate: true
-                }
-            ,
+            }, { hydrate: true },
             (err, res) => {
                 if (err) console.log('error: ', err);
                 console.log('result: ', res);
                 resolve(res.hits.hits);
             }));
         case 'Price':
-            return new Promise(resolve => Flat.
+        return new Promise(resolve => Flat.
             esSearch({
+                "sort" : { "Price" : { "order" : filter.order }},
                 "size": 1000,
                 "query": {
                     "bool": {
@@ -91,27 +86,15 @@ function getFlats(filter) {
                                 }
                             }
                         },
-                        "must": {
-                            "fuzzy": {
-                                "Address": {
-                                    "value": filter.address === '' ? '*' : filter.address,
-                                    "fuzziness": 2,
-                                    "transpositions": true
-                                }
-                            }
-                        }
+                        "must": matchObj
                     }
                 }
-                }, {  "sort" :
-                        { "Price" : {"order" : order}},
-                    hydrate: true,
-                }
-                ,
-                (err, res) => {
-                    if (err) console.log('error: ', err);
-                    console.log('result: ', res);
-                    resolve(res.hits.hits);
-                }));
+        }, { hydrate: true },
+        (err, res) => {
+            if (err) console.log('error: ', err);
+            console.log('result: ', res);
+            resolve(res.hits.hits);
+        }));
         default:
             return new Promise(resolve => Flat.
             esSearch({
@@ -126,18 +109,10 @@ function getFlats(filter) {
                                     }
                                 }
                             },
-                            "must": {
-                                "fuzzy": {
-                                    "Address": {
-                                        "value": filter.address === '' ? '*' : filter.address,
-                                        "fuzziness": 2,
-                                        "transpositions": true
-                                    }
-                                }
-                            }
+                            "must": matchObj
                         }
                     }
-                }, { hydrate: true },
+                }, 
                 (err, res) => {
                     if (err) console.log('error: ', err);
                     console.log('result: ', res);
@@ -181,7 +156,7 @@ async function sync() {
     const stream = Flat.synchronize();
     let count = 0;
 
-    stream.on('data', (err, doc) => {
+    stream.on('data', () => {
         count++;
     });
     stream.on('close', () => {
@@ -190,18 +165,6 @@ async function sync() {
     stream.on('error', (err) => {
         console.log(err);
     });
-    // Book.createMapping({
-    //     "analysis" : {
-    //         "analyzer":{
-    //             "content":{
-    //                 "type":"custom",
-    //                 "tokenizer":"whitespace"
-    //             }
-    //         }
-    //     }
-    // },function(err, mapping){
-    //     console.log(mapping);
-    // });
 }
 
 // exports

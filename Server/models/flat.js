@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const mongoosastic = require('mongoosastic');
+const elasticsearch = require('elasticsearch');
+const esClient = new elasticsearch.Client({host: 'https://l8ii803f3u:n4p2abo2z3@cedar-2548810.us-east-1.bonsaisearch.net'});
 
 const FlatSchema = new mongoose.Schema({
     Address: {
@@ -7,15 +9,11 @@ const FlatSchema = new mongoose.Schema({
         default: '',
         unique: true,
         es_indexed: true,
-        es_type: 'string',
-        es_analyzer: 'russian',
-        index: 'analyzed',
     },
     Price: {
         type: Number,
         default: '',
         es_indexed: true,
-        es_type: 'integer',
     },
     Description: {
         type: String,
@@ -33,7 +31,6 @@ const FlatSchema = new mongoose.Schema({
         type: Date,
         default: new Date(),
         es_indexed: true,
-        es_type: 'date',
     },
     URL: {
         type: String,
@@ -42,6 +39,10 @@ const FlatSchema = new mongoose.Schema({
     }
 });
 
-FlatSchema.plugin(mongoosastic);
+FlatSchema.plugin(mongoosastic, {
+    hydrate: true,
+    esClient: esClient
+});
+
 module.exports = mongoose.model('Flat', FlatSchema);
 
