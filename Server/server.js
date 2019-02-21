@@ -5,9 +5,8 @@ import mongoose from 'mongoose';
 import { Mockgoose } from 'mockgoose';
 
 const mockgoose = new Mockgoose(mongoose);
-const flatsURI = process.env.MONGO_FLATS;
-
-mongoose.connect(flatsURI,
+const orderURI = 'mongodb+srv://letyxxxa:Chernobyl1986!@cluster0-b1zzv.mongodb.net/Vasilishki';
+mongoose.connect(orderURI,
   { useNewUrlParser: true });
 
 // if (process.env.NODE_ENV === 'test') {
