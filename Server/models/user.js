@@ -20,17 +20,17 @@ const UserSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  favoriteFlats: {
-    type: Array,
-    default: [],
-  },
   signUpDate: {
     type: Date,
     default: new Date(),
   },
+  balance: {
+    type: Number,
+    default: 0,
+  },
 });
 
-UserSchema.methods.generateHash = function(password) {
+UserSchema.methods.generateHash = (password) => {
   return bcrypt.hashSync(password, bcrypt.genSaltSync(8), null);
 };
 

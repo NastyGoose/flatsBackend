@@ -5,7 +5,7 @@ import mongoose from 'mongoose';
 import { Mockgoose } from 'mockgoose';
 
 const mockgoose = new Mockgoose(mongoose);
-const flatsURI = process.env.MONGO_FLATS;
+const flatsURI = 'mongodb+srv://letyxxxa:Chernobyl1986!@cluster0-b1zzv.mongodb.net/valik?';
 
 mongoose.connect(flatsURI,
   { useNewUrlParser: true });

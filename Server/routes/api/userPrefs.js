@@ -26,22 +26,19 @@ router.post('/removeFavorite', (req, res) => {
     .catch(err => res.send(err));
 });
 
-router.get('/getAddData/:email', (req, res) => {
+router.get('/getBalance/:email', (req, res) => {
   flats.getAdditionalData(req.params.email)
     .then((data) => {
-      const seconds = Math.floor((new Date() - data.signUpDate) / 1000);
-      const daysSinceSignUp = Math.floor(seconds / (3600 * 24));
-      if (data.res.length > 0) {
+      console.log(data);
+      if (data) {
         res.send({
           success: true,
-          payload: lodash.compact(data.res),
-          daysSinceSignUp,
+          payload: data.message,
         });
       } else {
         res.send({
           success: false,
           payload: [],
-          daysSinceSignUp,
         });
       }
     })

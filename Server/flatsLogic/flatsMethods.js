@@ -28,14 +28,10 @@ function getAdditionalData(email) {
     .findOne({ email })
     .then((res) => {
       if (res) {
-        const idArr = res.favoriteFlats.map(curr => ObjectID(curr));
-        const signUpDate = res.signUpDate;
-        return Flat
-          .find({ _id: { $in: idArr } })
-          .then(res => ({
-            res,
-            signUpDate,
-          }));
+        return {
+          success: true,
+          message: res.balance,
+        };
       }
       return {
         success: false,

@@ -9,7 +9,7 @@ router.post('/signup', (req, res) => {
   const { body } = req;
   const {
     login,
-    password,
+    password
   } = body;
   let {
     email,
@@ -85,7 +85,7 @@ router.post('/signin', (req, res) => {
   let {
     email,
   } = body;
-  console.log(req.body);
+  console.log('signin: ', req.body);
   if (!email) {
     return res.send({
       success: false,
@@ -149,32 +149,19 @@ router.post('/signin', (req, res) => {
 
 router.post('/changeData', (req, res) => {
   console.log(req.body);
-  const { payload } = req.body.newData;
-  const { oldEmail } = req.body.newData;
+  const { email, balance } = req.body;
 
-  User.findOne({ email: oldEmail }, (err, user) => {
-    Object.keys(payload).forEach((curr) => {
-      if (curr === 'password') user[curr] = user.generateHash(payload.password);
-      else user[curr] = payload[curr];
-    });
-    user.token = jwt.sign({
-      email: user.email,
-      login: user.login,
-    }, 'keyword');
-
+  User.findOne({ email }, (err, user) => {
     user.update({
       $set: {
-        email: user.email,
-        login: user.login,
-        password: user.password,
-        token: user.token,
+        balance,
       },
     }).exec();
 
     return res.send({
       success: true,
       message: 'Successfully changed data',
-      payload: user.token,
+      payload: balance,
     });
   });
 });
